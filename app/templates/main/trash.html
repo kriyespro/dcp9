@@ -1,0 +1,198 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="sm:flex sm:items-center mb-8">
+        <div class="sm:flex-auto">
+            <h1 class="text-2xl font-semibold text-gray-900">Recycle Bin</h1>
+            <p class="mt-2 text-sm text-gray-700">Recover your deleted items</p>
+        </div>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="mb-4 rounded-md p-4 {% if category == 'error' %}bg-red-50 text-red-800{% else %}bg-green-50 text-green-800{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <!-- Tabs -->
+    <div class="border-b border-gray-200">
+        <nav class="-mb-px flex space-x-8" aria-label="Tabs">
+            <button onclick="showTab('dreams')" class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" data-tab="dreams">
+                Dreams ({{ deleted_dreams|length }})
+            </button>
+            <button onclick="showTab('milestones')" class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" data-tab="milestones">
+                Milestones ({{ deleted_milestones|length }})
+            </button>
+            <button onclick="showTab('goals')" class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" data-tab="goals">
+                Goals ({{ deleted_goals|length }})
+            </button>
+            <button onclick="showTab('tasks')" class="tab-btn border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300 whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm" data-tab="tasks">
+                Tasks ({{ deleted_tasks|length }})
+            </button>
+        </nav>
+    </div>
+
+    <!-- Content sections -->
+    <div class="mt-4">
+        <!-- Dreams Tab -->
+        <div id="dreams-tab" class="tab-content hidden">
+            <div class="bg-white shadow overflow-hidden sm:rounded-md">
+                <ul role="list" class="divide-y divide-gray-200">
+                    {% for dream in deleted_dreams %}
+                    <li class="px-4 py-4 sm:px-6 hover:bg-gray-50">
+                        <div class="flex items-center justify-between">
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-deep-pink-600 truncate">{{ dream.title }}</p>
+                                <p class="text-sm text-gray-500">Deleted: {{ dream.deleted_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                            </div>
+                            <div class="ml-4">
+                                <form action="{{ url_for('main.restore_item', item_type='dream', item_id=dream.id) }}" method="POST" class="inline">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-deep-pink-600 hover:bg-deep-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-deep-pink-500">
+                                        Restore
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </li>
+                    {% else %}
+                    <li class="px-4 py-4 sm:px-6 text-center text-gray-500">No deleted dreams found</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Milestones Tab -->
+        <div id="milestones-tab" class="tab-content hidden">
+            <div class="bg-white shadow overflow-hidden sm:rounded-md">
+                <ul role="list" class="divide-y divide-gray-200">
+                    {% for milestone in deleted_milestones %}
+                    <li class="px-4 py-4 sm:px-6 hover:bg-gray-50">
+                        <div class="flex items-center justify-between">
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-deep-pink-600 truncate">{{ milestone.title }}</p>
+                                <p class="text-sm text-gray-500">
+                                    Dream: {{ milestone.dream.title if milestone.dream else 'N/A' }}
+                                    <span class="mx-2">•</span>
+                                    Deleted: {{ milestone.deleted_at.strftime('%Y-%m-%d %H:%M') }}
+                                </p>
+                            </div>
+                            <div class="ml-4">
+                                <form action="{{ url_for('main.restore_item', item_type='milestone', item_id=milestone.id) }}" method="POST" class="inline">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-deep-pink-600 hover:bg-deep-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-deep-pink-500">
+                                        Restore
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </li>
+                    {% else %}
+                    <li class="px-4 py-4 sm:px-6 text-center text-gray-500">No deleted milestones found</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Goals Tab -->
+        <div id="goals-tab" class="tab-content hidden">
+            <div class="bg-white shadow overflow-hidden sm:rounded-md">
+                <ul role="list" class="divide-y divide-gray-200">
+                    {% for goal in deleted_goals %}
+                    <li class="px-4 py-4 sm:px-6 hover:bg-gray-50">
+                        <div class="flex items-center justify-between">
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-deep-pink-600 truncate">{{ goal.title }}</p>
+                                <p class="text-sm text-gray-500">
+                                    Milestone: {{ goal.milestone.title if goal.milestone else 'N/A' }}
+                                    <span class="mx-2">•</span>
+                                    Deleted: {{ goal.deleted_at.strftime('%Y-%m-%d %H:%M') }}
+                                </p>
+                            </div>
+                            <div class="ml-4">
+                                <form action="{{ url_for('main.restore_item', item_type='goal', item_id=goal.id) }}" method="POST" class="inline">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-deep-pink-600 hover:bg-deep-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-deep-pink-500">
+                                        Restore
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </li>
+                    {% else %}
+                    <li class="px-4 py-4 sm:px-6 text-center text-gray-500">No deleted goals found</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <!-- Tasks Tab -->
+        <div id="tasks-tab" class="tab-content hidden">
+            <div class="bg-white shadow overflow-hidden sm:rounded-md">
+                <ul role="list" class="divide-y divide-gray-200">
+                    {% for task in deleted_tasks %}
+                    <li class="px-4 py-4 sm:px-6 hover:bg-gray-50">
+                        <div class="flex items-center justify-between">
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-medium text-deep-pink-600 truncate">{{ task.title }}</p>
+                                <p class="text-sm text-gray-500">
+                                    Goal: {{ task.goal.title if task.goal else 'N/A' }}
+                                    <span class="mx-2">•</span>
+                                    Assignee: {{ task.assignee.get_full_name() if task.assignee else 'Unassigned' }}
+                                    <span class="mx-2">•</span>
+                                    Deleted: {{ task.deleted_at.strftime('%Y-%m-%d %H:%M') }}
+                                </p>
+                            </div>
+                            <div class="ml-4">
+                                <form action="{{ url_for('main.restore_item', item_type='task', item_id=task.id) }}" method="POST" class="inline">
+                                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                                    <button type="submit" class="inline-flex items-center px-3 py-1 border border-transparent text-sm leading-4 font-medium rounded-md text-white bg-deep-pink-600 hover:bg-deep-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-deep-pink-500">
+                                        Restore
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </li>
+                    {% else %}
+                    <li class="px-4 py-4 sm:px-6 text-center text-gray-500">No deleted tasks found</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showTab(tabName) {
+    // Hide all tab contents
+    document.querySelectorAll('.tab-content').forEach(content => {
+        content.classList.add('hidden');
+    });
+    
+    // Remove active class from all tab buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('border-deep-pink-500', 'text-deep-pink-600');
+        btn.classList.add('border-transparent', 'text-gray-500');
+    });
+    
+    // Show selected tab content
+    const selectedTab = document.getElementById(`${tabName}-tab`);
+    selectedTab.classList.remove('hidden');
+    
+    // Activate selected tab button
+    const selectedBtn = document.querySelector(`[data-tab="${tabName}"]`);
+    selectedBtn.classList.remove('border-transparent', 'text-gray-500');
+    selectedBtn.classList.add('border-deep-pink-500', 'text-deep-pink-600');
+}
+
+// Show dreams tab by default
+document.addEventListener('DOMContentLoaded', () => {
+    showTab('dreams');
+});
+</script>
+{% endblock %} 

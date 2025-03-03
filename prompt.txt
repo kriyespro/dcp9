@@ -1,0 +1,59 @@
+Create a project management app with Flask, Tailwind CSS via CDN, Alpine.js, SQLite for development, and PostgreSQL for production. The app should follow a hierarchical structure: Dreams > Milestones > Goals > Tasks.
+
+Technical stack:
+- Backend: Flask with SQLAlchemy ORM
+- Frontend: Tailwind CSS (via CDN), Alpine.js for interactivity
+- Database: SQLite for development, PostgreSQL for production
+- Authentication: Flask-Login with user roles (admin/user)
+
+Database Models:
+1. User model (id, username, email, password_hash, role, created_at)
+2. Dream model (id, title, description, progress, user_id, created_at, updated_at)
+3. Milestone model (id, title, description, progress, dream_id, created_at, updated_at)
+4. Goal model (id, title, description, progress, milestone_id, created_at, updated_at)
+5. Task model (id, title, description, assignee_id, due_date, priority, status, progress, goal_id, created_at, updated_at)
+6. Notification model (id, user_id, message, read, created_at)
+
+Main Dashboard Layout:
+- Top navigation showing overall metrics: Dream progress percentage, total milestones, total goals, total tasks
+- Four-column layout:
+  - Column 1 (20% width): Dreams 
+  - Column 2 (20% width): Milestones
+  - Column 3 (20% width): Goals
+  - Column 4 (40% width): Tasks
+
+Interactive Features:
+- When a Dream is selected in column 1, show its Milestones in column 2
+- When a Milestone is selected in column 2, show its Goals in column 3
+- When a Goal is selected in column 3, show its Tasks in column 4
+- Tasks should be displayed in table format with columns: Title, Assigned To, Due Date, Priority, Progress Status
+- Each card (Dream, Milestone, Goal) should have Edit and Delete options
+- Each column should have an "Add" button at the top (Add Dream, Add Milestone, etc.)
+
+User Roles and Permissions:
+- Admin: Can create/edit/delete Dreams, Milestones, Goals, Tasks, and Users
+- Regular User: Can view assigned tasks and update their status
+
+User Dashboard:
+- Notifications panel showing newly assigned tasks
+- Table of all tasks assigned to the current user
+- Ability to update task status and progress
+
+Admin Features:
+- User management section (Create, Edit, Delete users)
+- Ability to assign tasks to any user
+
+Design Specifications:
+- Modern, clean Tailwind CSS design
+- Color scheme: Deep pink, grey, and light grey as main colors
+- Card background color: White
+- Use icons and badges to enhance UI
+- Compact layout with clear visual hierarchy
+
+Project Structure:
+1. Models directory with all database models
+2. Templates directory with component-based UI structure
+3. Views and routes organized by feature
+4. Follow Flask best practices for project organization
+
+Ensure the app has proper error handling, form validation, and CSRF protection. Implement responsive design for mobile compatibility.

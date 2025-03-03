@@ -1,0 +1,40 @@
+create a Project managment app with 
+flask ,tailwind cdn , alpine js , sqlite , pgsql for prduction 
+
+
+
+main dashbaord 
+
+on top navigation shaow dream % progress , total milstone , total gola , total task 
+
+make 4 column  - Dream - Milestone - Gaol - Task 
+
+dream  Card   (ADD DREAM ) |     Mile Stone Card (ADD MILESTONE|   Goal card (ADD GOAL) |  Task CARD  (ADD TASK )
+
+dREAM 1   (dELETE , eDIT) |  MILESTONE 1 OF DREAM 1  (EDIT,DELATE) | GOAL 1 OF MILESTONE 1 & Dream 1  (delate , edit) | Task 1 of goal 1 ,mile tone 1 & dream 1 (delate,edit)
+
+
+when dream on coloumn 1st selct , Total milestone under that dream expand in 2nd column , when in 2nd columne any milestone clieck in next column 
+all goal under thats milestone expand in next coumnn , when any of goal selcted all task under tahst goals ll be expanded in next column .
+
+
+so we need 4 column  (use 20% space for dream , milestone , goal and for task use 40% of sapce )
+
+
+in task show in table formet in column 4th , show task with assied name ,date  , priority , task prograess stsuts .
+
+
+
+now user part , admin can create dream , milestone , goal , task & assign task to any user , in user dashbaord give notifivation & show task all asign to that user in table forment with all task detaisl 
+
+admin can cantrol user , create , delate , edit user account . 
+
+
+in style part make a very good moden tailwind cdn based dashbaord , claen  , use very good nice easy to see color scema
+use compact look and feel ,use color deep pink , grey and ligit grey as main color use card color 100 white ,use icon badge to inhence look and feel .
+
+
+
+first all models then create all tempates , use compnets base ui ux , then create all views routes 
+
+finish with flask own best  pattern , make a good app . 

@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title|default('Dream Project Management') }}</title>
+    
+    <!-- CSRF Token -->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#FF1493', // Deep Pink
+                        'primary-dark': '#CC1077',
+                        'primary-light': '#FF69B4',
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <!-- Alpine.js CDN -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
+    <!-- Custom Styles -->
+    <style>
+        .card {
+            @apply bg-white rounded-lg shadow-md p-6;
+        }
+        .btn-primary {
+            @apply inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-primary hover:bg-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary;
+        }
+        .input-field {
+            @apply appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-primary focus:border-primary focus:z-10 sm:text-sm;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-50">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16">
+                <div class="flex">
+                    <div class="flex-shrink-0 flex items-center">
+                        <a href="{{ url_for('main.dashboard') }}" class="text-primary font-bold text-xl">
+                            DreamPM
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="flex items-center">
+                    {% if current_user.is_authenticated %}
+                        <a href="{{ url_for('main.dashboard') }}" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">Dashboard</a>
+                        <a href="{{ url_for('main.trash') }}" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">
+                            <div class="flex items-center">
+                                <svg class="h-5 w-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                </svg>
+                                Recycle Bin
+                            </div>
+                        </a>
+                        {% if current_user.is_admin() %}
+                        <a href="{{ url_for('main.admin_users') }}" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">Users</a>
+                        {% endif %}
+                        <a href="{{ url_for('main.profile') }}" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">Profile</a>
+                        <a href="{{ url_for('auth.logout') }}" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">Logout</a>
+                    {% else %}
+                        <a href="{{ url_for('auth.login') }}" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">Login</a>
+                        <a href="{{ url_for('auth.register') }}" class="text-gray-700 hover:text-primary px-3 py-2 rounded-md text-sm font-medium">Register</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Flash Messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div class="fixed top-4 right-4 z-50 space-y-2">
+                {% for category, message in messages %}
+                    <div x-data="{ show: true }" 
+                         x-show="show" 
+                         x-init="setTimeout(() => show = false, 5000)"
+                         class="rounded-lg p-4 flex items-center space-x-3 shadow-lg {% if category == 'error' %}bg-red-100 text-red-700{% else %}bg-green-100 text-green-700{% endif %}">
+                        <div class="flex-shrink-0">
+                            {% if category == 'error' %}
+                                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                </svg>
+                            {% else %}
+                                <svg class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                            {% endif %}
+                        </div>
+                        <p class="text-sm font-medium">{{ message }}</p>
+                        <button @click="show = false" class="flex-shrink-0 ml-auto">
+                            <svg class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
+                            </svg>
+                        </button>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white mt-12">
+        <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
+            <p class="text-center text-gray-500 text-sm">
+                &copy; {{ now.year }} Dream Project Management. All rights reserved.
+            </p>
+        </div>
+    </footer>
+</body>
+</html> 

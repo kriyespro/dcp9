@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="md:grid md:grid-cols-3 md:gap-6">
+        <div class="md:col-span-1">
+            <div class="px-4 sm:px-0">
+                <h3 class="text-lg font-medium leading-6 text-gray-900">{{ "Edit" if user else "New" }} User</h3>
+                <p class="mt-1 text-sm text-gray-600">
+                    {{ "Update user information." if user else "Create a new user account." }}
+                </p>
+            </div>
+        </div>
+        <div class="mt-5 md:mt-0 md:col-span-2">
+            <form action="{{ url_for('main.admin_user_edit', user_id=user.id) if user else url_for('main.admin_user_new') }}" method="POST">
+                <div class="shadow sm:rounded-md sm:overflow-hidden">
+                    <div class="px-4 py-5 bg-white space-y-6 sm:p-6">
+                        {% with messages = get_flashed_messages(with_categories=true) %}
+                            {% if messages %}
+                                {% for category, message in messages %}
+                                    <div class="rounded-md bg-{{ 'green' if category == 'success' else 'red' }}-50 p-4">
+                                        <div class="flex">
+                                            <div class="ml-3">
+                                                <p class="text-sm font-medium text-{{ 'green' if category == 'success' else 'red' }}-800">
+                                                    {{ message }}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
+
+                        <div class="grid grid-cols-6 gap-6">
+                            <div class="col-span-6 sm:col-span-3">
+                                <label for="username" class="block text-sm font-medium text-gray-700">Username</label>
+                                <input type="text" name="username" id="username" value="{{ user.username if user else '' }}" required class="mt-1 focus:ring-deep-pink-500 focus:border-deep-pink-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                            </div>
+
+                            <div class="col-span-6 sm:col-span-3">
+                                <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+                                <input type="email" name="email" id="email" value="{{ user.email if user else '' }}" required class="mt-1 focus:ring-deep-pink-500 focus:border-deep-pink-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                            </div>
+
+                            <div class="col-span-6 sm:col-span-3">
+                                <label for="first_name" class="block text-sm font-medium text-gray-700">First Name</label>
+                                <input type="text" name="first_name" id="first_name" value="{{ user.first_name if user else '' }}" required class="mt-1 focus:ring-deep-pink-500 focus:border-deep-pink-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                            </div>
+
+                            <div class="col-span-6 sm:col-span-3">
+                                <label for="last_name" class="block text-sm font-medium text-gray-700">Last Name</label>
+                                <input type="text" name="last_name" id="last_name" value="{{ user.last_name if user else '' }}" required class="mt-1 focus:ring-deep-pink-500 focus:border-deep-pink-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                            </div>
+
+                            {% if not user %}
+                            <div class="col-span-6 sm:col-span-3">
+                                <label for="password" class="block text-sm font-medium text-gray-700">Password</label>
+                                <input type="password" name="password" id="password" required class="mt-1 focus:ring-deep-pink-500 focus:border-deep-pink-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                            </div>
+
+                            <div class="col-span-6 sm:col-span-3">
+                                <label for="password_confirm" class="block text-sm font-medium text-gray-700">Confirm Password</label>
+                                <input type="password" name="password_confirm" id="password_confirm" required class="mt-1 focus:ring-deep-pink-500 focus:border-deep-pink-500 block w-full shadow-sm sm:text-sm border-gray-300 rounded-md">
+                            </div>
+                            {% endif %}
+
+                            <div class="col-span-6 sm:col-span-3">
+                                <label for="role" class="block text-sm font-medium text-gray-700">Role</label>
+                                <select id="role" name="role" class="mt-1 block w-full py-2 px-3 border border-gray-300 bg-white rounded-md shadow-sm focus:outline-none focus:ring-deep-pink-500 focus:border-deep-pink-500 sm:text-sm">
+                                    {% for role in roles %}
+                                    <option value="{{ role.id }}" {{ 'selected' if user and user.role_id == role.id else '' }}>{{ role.name | title }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
+                        <a href="{{ url_for('main.admin_users') }}" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-deep-pink-500 mr-3">
+                            Cancel
+                        </a>
+                        <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-deep-pink-600 hover:bg-deep-pink-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-deep-pink-500">
+                            {{ "Update" if user else "Create" }} User
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %} 

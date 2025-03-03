@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8">
+    <div class="max-w-2xl mx-auto px-4">
+        <div class="bg-white rounded-lg shadow-sm hover:shadow transition-all duration-200 border border-gray-100/80 overflow-hidden">
+            <div class="p-6">
+                <h1 class="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-violet-500 to-purple-600 mb-6">Create New Goal for {{ milestone.title }}</h1>
+
+                <form method="POST" class="space-y-4">
+                    {{ form.csrf_token }}
+                    
+                    <div>
+                        <label for="title" class="block text-sm font-medium text-gray-700">Title</label>
+                        {{ form.title(class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-violet-500 focus:ring-violet-500 sm:text-sm", placeholder="Enter goal title") }}
+                        {% if form.title.errors %}
+                            {% for error in form.title.errors %}
+                                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label for="description" class="block text-sm font-medium text-gray-700">Description</label>
+                        {{ form.description(class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-violet-500 focus:ring-violet-500 sm:text-sm", rows="4", placeholder="Describe your goal") }}
+                        {% if form.description.errors %}
+                            {% for error in form.description.errors %}
+                                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div>
+                        <label for="target_date" class="block text-sm font-medium text-gray-700">Target Date</label>
+                        {{ form.target_date(class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-violet-500 focus:ring-violet-500 sm:text-sm", type="date") }}
+                        {% if form.target_date.errors %}
+                            {% for error in form.target_date.errors %}
+                                <p class="text-red-500 text-xs mt-1">{{ error }}</p>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+
+                    <div class="flex justify-end space-x-3 pt-4">
+                        <a href="{{ url_for('main.dashboard') }}" 
+                           class="inline-flex items-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500">
+                            Cancel
+                        </a>
+                        {{ form.submit(class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

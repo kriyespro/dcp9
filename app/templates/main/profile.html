@@ -1,0 +1,227 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+    <!-- Assigned Tasks -->
+    <div class="md:grid md:grid-cols-3 md:gap-6">
+        <div class="md:col-span-1">
+            <div class="px-4 sm:px-0">
+                <h3 class="text-lg font-medium leading-6 text-gray-900">Assigned Tasks</h3>
+                <p class="mt-1 text-sm text-gray-600">
+                    Tasks that are currently assigned to you.
+                </p>
+            </div>
+        </div>
+        <div class="mt-5 md:mt-0 md:col-span-2">
+            <div class="shadow sm:rounded-md sm:overflow-hidden">
+                <div class="bg-white">
+                    <ul class="divide-y divide-gray-200" x-data="{ 
+                        editingTask: null,
+                        statuses: ['Not Started', 'In Progress', 'Review', 'Done'],
+                        notification: null,
+                        async updateTask(taskId, data) {
+                            try {
+                                const response = await fetch(`/api/tasks/${taskId}/update`, {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRFToken': '{{ csrf_token() }}'
+                                    },
+                                    body: JSON.stringify(data)
+                                });
+                                const result = await response.json();
+                                
+                                if (response.ok) {
+                                    this.notification = {
+                                        type: 'success',
+                                        message: 'Task updated successfully'
+                                    };
+                                    setTimeout(() => window.location.reload(), 1000);
+                                } else {
+                                    throw new Error(result.error || 'Failed to update task');
+                                }
+                            } catch (error) {
+                                console.error('Error updating task:', error);
+                                this.notification = {
+                                    type: 'error',
+                                    message: error.message
+                                };
+                                setTimeout(() => this.notification = null, 3000);
+                            }
+                        }
+                    }">
+                        <!-- Notification -->
+                        <div x-show="notification" 
+                             x-transition:enter="transition ease-out duration-300"
+                             x-transition:enter-start="opacity-0 transform -translate-y-2"
+                             x-transition:enter-end="opacity-100 transform translate-y-0"
+                             x-transition:leave="transition ease-in duration-300"
+                             x-transition:leave-start="opacity-100 transform translate-y-0"
+                             x-transition:leave-end="opacity-0 transform -translate-y-2"
+                             :class="{
+                                'bg-green-50 text-green-800': notification?.type === 'success',
+                                'bg-red-50 text-red-800': notification?.type === 'error'
+                             }"
+                             class="p-4 rounded-md mb-4">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <svg x-show="notification?.type === 'success'" class="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                    </svg>
+                                    <svg x-show="notification?.type === 'error'" class="h-5 w-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm" x-text="notification?.message"></p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% for task in current_user.assigned_tasks %}
+                        <li class="px-4 py-4 sm:px-6" x-data="{ showEdit: false }">
+                            <div class="flex items-center justify-between">
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center justify-between">
+                                        <p class="text-sm font-medium text-primary truncate">{{ task.title }}</p>
+                                        <div class="ml-2 flex-shrink-0">
+                                            <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full
+                                                {% if task.priority == 'High' %}bg-red-100 text-red-800
+                                                {% elif task.priority == 'Medium' %}bg-yellow-100 text-yellow-800
+                                                {% else %}bg-green-100 text-green-800{% endif %}">
+                                                {{ task.priority }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Task Description -->
+                                    <div class="mt-2" x-show="!showEdit">
+                                        <div class="flex items-center text-sm text-gray-500">
+                                            <p>{{ task.description }}</p>
+                                        </div>
+                                    </div>
+                                    <div class="mt-2" x-show="showEdit">
+                                        <textarea 
+                                            x-ref="descriptionInput_{{ task.id }}"
+                                            class="w-full px-2 py-1 text-sm border rounded-md focus:outline-none focus:ring-1 focus:ring-primary"
+                                            rows="2"
+                                        >{{ task.description }}</textarea>
+                                    </div>
+                                    
+                                    <div class="mt-2 flex items-center justify-between">
+                                        <div class="flex items-center">
+                                            <span class="text-sm text-gray-500">Due: {{ task.due_date.strftime('%Y-%m-%d') if task.due_date else 'No due date' }}</span>
+                                        </div>
+                                        <div class="flex items-center gap-2">
+                                            <!-- Status Dropdown -->
+                                            <select 
+                                                class="text-xs font-semibold rounded-full px-2 py-1 border"
+                                                :class="{
+                                                    'bg-green-100 text-green-800': '{{ task.status }}' === 'Done',
+                                                    'bg-blue-100 text-blue-800': '{{ task.status }}' === 'In Progress',
+                                                    'bg-yellow-100 text-yellow-800': '{{ task.status }}' === 'Review',
+                                                    'bg-gray-100 text-gray-800': '{{ task.status }}' === 'Not Started'
+                                                }"
+                                                @change="updateTask({{ task.id }}, { status: $event.target.value })"
+                                            >
+                                                <template x-for="status in statuses" :key="status">
+                                                    <option 
+                                                        :value="status"
+                                                        :selected="status === '{{ task.status }}'"
+                                                        x-text="status"
+                                                    ></option>
+                                                </template>
+                                            </select>
+                                            
+                                            <!-- Edit/Save Description -->
+                                            <button 
+                                                @click="
+                                                    if (showEdit) {
+                                                        updateTask({{ task.id }}, { 
+                                                            description: $refs['descriptionInput_{{ task.id }}'].value 
+                                                        });
+                                                    }
+                                                    showEdit = !showEdit;
+                                                "
+                                                class="text-xs px-2 py-1 rounded-md"
+                                                :class="showEdit ? 'bg-green-100 text-green-800' : 'bg-blue-100 text-blue-800'"
+                                            >
+                                                <span x-text="showEdit ? 'Save' : 'Edit'"></span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mt-2">
+                                        <div class="w-full bg-gray-200 rounded-full h-2">
+                                            <div class="bg-primary rounded-full h-2" style="width: {{ task.progress }}%"></div>
+                                        </div>
+                                        <div class="mt-1 text-xs text-gray-500 text-right">
+                                            Progress: {{ "%.1f"|format(task.progress) }}%
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        {% else %}
+                        <li class="px-4 py-4 sm:px-6">
+                            <p class="text-sm text-gray-500">No tasks assigned to you.</p>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Profile Overview -->
+    <div class="mt-10">
+        <div class="md:grid md:grid-cols-3 md:gap-6">
+            <div class="md:col-span-1">
+                <div class="px-4 sm:px-0">
+                    <h3 class="text-lg font-medium leading-6 text-gray-900">Profile</h3>
+                    <p class="mt-1 text-sm text-gray-600">
+                        Your personal information and account settings.
+                    </p>
+                </div>
+            </div>
+            <div class="mt-5 md:mt-0 md:col-span-2">
+                <div class="shadow sm:rounded-md sm:overflow-hidden">
+                    <div class="px-4 py-5 bg-white space-y-6 sm:p-6">
+                        <div class="grid grid-cols-6 gap-6">
+                            <div class="col-span-6 sm:col-span-3">
+                                <label class="block text-sm font-medium text-gray-700">Username</label>
+                                <div class="mt-1 text-sm text-gray-900">{{ current_user.username }}</div>
+                            </div>
+
+                            <div class="col-span-6 sm:col-span-3">
+                                <label class="block text-sm font-medium text-gray-700">Email</label>
+                                <div class="mt-1 text-sm text-gray-900">{{ current_user.email }}</div>
+                            </div>
+
+                            <div class="col-span-6 sm:col-span-3">
+                                <label class="block text-sm font-medium text-gray-700">First Name</label>
+                                <div class="mt-1 text-sm text-gray-900">{{ current_user.first_name }}</div>
+                            </div>
+
+                            <div class="col-span-6 sm:col-span-3">
+                                <label class="block text-sm font-medium text-gray-700">Last Name</label>
+                                <div class="mt-1 text-sm text-gray-900">{{ current_user.last_name }}</div>
+                            </div>
+
+                            <div class="col-span-6">
+                                <label class="block text-sm font-medium text-gray-700">Role</label>
+                                <div class="mt-1 text-sm text-gray-900">{{ current_user.role.name.title() }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="px-4 py-3 bg-gray-50 text-right sm:px-6">
+                        <button type="button" class="btn-primary">
+                            Edit Profile
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

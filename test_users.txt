@@ -1,0 +1,9 @@
+Test User Credentials:
+
+Admin User:
+Email: admin@example.com
+Password: admin123
+
+Test User:
+Email: test@example.com
+Password: test123
