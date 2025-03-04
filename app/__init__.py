@@ -6,8 +6,13 @@ from flask_mail import Mail
 from flask_principal import Principal
 from flask_wtf.csrf import CSRFProtect
 from datetime import datetime
+import os
+from dotenv import load_dotenv
 
-from config import Config, DevelopmentConfig
+from config import config, get_config
+
+# Load environment variables
+load_dotenv()
 
 # Initialize Flask extensions
 db = SQLAlchemy()
@@ -19,9 +24,14 @@ mail = Mail()
 principal = Principal()
 csrf = CSRFProtect()
 
-def create_app(config_class=DevelopmentConfig):
+def create_app(config_name=None):
+    if config_name is None:
+        config_name = get_config()
+    
     app = Flask(__name__)
-    app.config.from_object(config_class)
+    
+    # Load the appropriate configuration
+    app.config.from_object(config[config_name])
     
     # Initialize extensions with app
     db.init_app(app)
